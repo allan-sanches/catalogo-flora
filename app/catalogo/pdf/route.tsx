@@ -4,6 +4,7 @@ import {
   Text,
   View,
   Image,
+  Link,
   Svg,
   Path,
   StyleSheet,
@@ -11,6 +12,7 @@ import {
 } from "@react-pdf/renderer";
 import { getPlantas, getMarca } from "../../reader";
 import { localImageDataUri } from "@/lib/serverImage";
+import { SITE_DOMAIN } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -37,14 +39,24 @@ const s = StyleSheet.create({
   idxFam: { fontSize: 13, color: VERDE, fontFamily: "Helvetica-Bold", marginTop: 12, marginBottom: 2 },
   idxGen: { fontSize: 10, color: VERDE_CLARO, fontFamily: "Helvetica-Bold", marginTop: 6 },
   idxItem: { fontSize: 9, color: CINZA, marginLeft: 10, marginTop: 1.5 },
+  idxLink: { marginLeft: 10, marginTop: 2, textDecoration: "none" },
+  idxName: { fontSize: 9.5, color: VERDE, fontFamily: "Helvetica-Bold" },
+  idxCient: { fontSize: 9, color: CINZA, fontStyle: "italic" },
+  idxPag: { fontSize: 8.5, color: VERDE_CLARO },
 
   // post (1 planta por página)
   post: { paddingTop: 0, paddingBottom: 46, paddingHorizontal: 0, fontFamily: "Helvetica", color: "#1f2937", backgroundColor: CREME },
   topbar: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: VERDE, paddingVertical: 14, paddingHorizontal: 34 },
   topbarName: { fontSize: 15, color: CREME, fontFamily: "Helvetica-Bold" },
   topbarSub: { fontSize: 8, color: BEGE, letterSpacing: 2, textTransform: "uppercase" },
+  heroWrap: { position: "relative", width: "100%" },
   hero: { width: "100%", height: 300, objectFit: "cover", backgroundColor: BEGE_CLARO },
   heroPh: { width: "100%", height: 300, backgroundColor: BEGE_CLARO, alignItems: "center", justifyContent: "center" },
+  detailCircle: { position: "absolute", top: 16, right: 26, width: 96, height: 96, borderRadius: 48, objectFit: "cover", border: `4px solid ${CREME}` },
+  ctaBar: { position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: VERDE, paddingVertical: 12, alignItems: "center" },
+  ctaTitle: { fontSize: 12, color: CREME, fontFamily: "Helvetica-Bold", letterSpacing: 1 },
+  ctaUrl: { fontSize: 9, color: BEGE, marginTop: 2 },
+  pageNum: { position: "absolute", bottom: 56, right: 40, fontSize: 8, color: VERDE_CLARO },
   body: { paddingHorizontal: 40, paddingTop: 22 },
   nome: { fontSize: 26, color: VERDE, fontFamily: "Helvetica-Bold" },
   cient: { fontSize: 13, color: CINZA, fontStyle: "italic", marginTop: 2 },
@@ -99,9 +111,15 @@ export async function GET() {
 
   // pré-carrega imagens (data URI) — evita depender de HTTP na Vercel
   const fotos: Record<string, string | null> = {};
+  const detalhes: Record<string, string | null> = {};
   await Promise.all(
     plantas.map(async (p) => {
-      fotos[p.slug] = await localImageDataUri(p.imagem);
+      const [pr, dt] = await Promise.all([
+        localImageDataUri(p.imagem),
+        localImageDataUri(p.imagemPadrao),
+      ]);
+      fotos[p.slug] = pr;
+      detalhes[p.slug] = dt ?? pr; // usa a foto principal se não houver detalhe
     })
   );
   const logoData = await localImageDataUri(marca.logoUrl);
@@ -140,6 +158,11 @@ export async function GET() {
 
   // ordem dos posts: por família, gênero, nome
   const ordenadas = familias.flatMap((f) => f.generos.flatMap((g) => g.lista));
+  // página de cada planta: capa = 1, depois 1 página por planta na ordem acima
+  const pageOf: Record<string, number> = {};
+  ordenadas.forEach((p, i) => {
+    pageOf[p.slug] = i + 2;
+  });
 
   const Footer = () => (
     <Text style={s.footer} fixed render={({ pageNumber, totalPages }) => `${marca.nome} · ${marca.subtitulo}                                                                 ${pageNumber} / ${totalPages}`} />
@@ -169,35 +192,13 @@ export async function GET() {
         <Footer />
       </Page>
 
-      {/* ÍNDICE */}
-      <Page size="A4" style={s.page}>
-        <View style={s.headerFix} fixed>
-          <Text>{marca.nome}</Text>
-          <Text>Índice</Text>
-        </View>
-        <Text style={s.h1}>Índice</Text>
-        {familias.map((f) => (
-          <View key={f.familia} wrap={false}>
-            <Text style={s.idxFam}>{f.familia}</Text>
-            {f.generos.map((g) => (
-              <View key={g.genero}>
-                <Text style={s.idxGen}>{g.genero} ({g.lista.length})</Text>
-                {g.lista.map((p) => (
-                  <Text key={p.slug} style={s.idxItem}>• {p.nomeComum} — {p.nomeCientifico}</Text>
-                ))}
-              </View>
-            ))}
-          </View>
-        ))}
-        <Footer />
-      </Page>
-
       {/* UM POST POR PLANTA */}
       {ordenadas.map((p) => {
         const foto = fotos[p.slug];
+        const detalhe = detalhes[p.slug];
         const tamanhos = [...p.tamanhos];
         return (
-          <Page key={p.slug} size="A4" style={s.post}>
+          <Page key={p.slug} size="A4" style={s.post} id={p.slug} bookmark={p.nomeComum}>
             <View style={s.topbar}>
               {logoData ? (
                 // eslint-disable-next-line jsx-a11y/alt-text
@@ -211,14 +212,20 @@ export async function GET() {
               </View>
             </View>
 
-            {foto ? (
-              // eslint-disable-next-line jsx-a11y/alt-text
-              <Image src={foto} style={s.hero} />
-            ) : (
-              <View style={s.heroPh}>
-                <Leaf size={72} color={VERDE_CLARO} />
-              </View>
-            )}
+            <View style={s.heroWrap}>
+              {foto ? (
+                // eslint-disable-next-line jsx-a11y/alt-text
+                <Image src={foto} style={s.hero} />
+              ) : (
+                <View style={s.heroPh}>
+                  <Leaf size={72} color={VERDE_CLARO} />
+                </View>
+              )}
+              {detalhe ? (
+                // eslint-disable-next-line jsx-a11y/alt-text
+                <Image src={detalhe} style={s.detailCircle} />
+              ) : null}
+            </View>
 
             <View style={s.body}>
               <Text style={s.nome}>{p.nomeComum}</Text>
@@ -286,10 +293,41 @@ export async function GET() {
               {p.fonte ? <Text style={s.fonte}>Fonte: {p.fonte}</Text> : null}
             </View>
 
-            <Footer />
+            <Text style={s.pageNum} fixed render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
+            <View style={s.ctaBar}>
+              <Text style={s.ctaTitle}>COMPRE NA LOJA</Text>
+              <Text style={s.ctaUrl}>{`${SITE_DOMAIN}/planta/${p.slug}`}</Text>
+            </View>
           </Page>
         );
       })}
+
+      {/* ÍNDICE (no fim) — clicável e com número de página */}
+      <Page size="A4" style={s.page} bookmark="Índice">
+        <View style={s.headerFix} fixed>
+          <Text>{marca.nome}</Text>
+          <Text>Índice</Text>
+        </View>
+        <Text style={s.h1}>Índice</Text>
+        {familias.map((f) => (
+          <View key={f.familia} wrap={false}>
+            <Text style={s.idxFam}>{f.familia}</Text>
+            {f.generos.map((g) => (
+              <View key={g.genero}>
+                <Text style={s.idxGen}>{g.genero} ({g.lista.length})</Text>
+                {g.lista.map((p) => (
+                  <Link key={p.slug} href={`#${p.slug}`} style={s.idxLink}>
+                    <Text style={s.idxName}>{p.nomeComum}</Text>
+                    <Text style={s.idxCient}> — {p.nomeCientifico}</Text>
+                    <Text style={s.idxPag}>  pág. {pageOf[p.slug]}</Text>
+                  </Link>
+                ))}
+              </View>
+            ))}
+          </View>
+        ))}
+        <Footer />
+      </Page>
     </Document>
   );
 

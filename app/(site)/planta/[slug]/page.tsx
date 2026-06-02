@@ -67,28 +67,41 @@ export default async function PlantaPage({
       </div>
 
       <header className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {/* Foto */}
-        <figure className="relative aspect-[4/3] w-full overflow-hidden rounded-box border border-base-300 bg-base-200">
-          {planta.imagem ? (
-            <Image
-              src={planta.imagem}
-              alt={planta.nomeComum}
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-7xl opacity-30">
-              🌱
-            </div>
+        {/* Fotos */}
+        <div className="flex flex-col gap-2">
+          <figure className="relative aspect-[4/3] w-full overflow-hidden rounded-box border border-base-300 bg-base-200">
+            {planta.imagem ? (
+              <Image
+                src={planta.imagem}
+                alt={planta.nomeComum}
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center text-7xl opacity-30">
+                🌱
+              </div>
+            )}
+            {planta.creditoImagem && (
+              <figcaption className="absolute bottom-0 right-0 bg-base-100/80 px-2 py-0.5 text-[10px] text-base-content/60">
+                {planta.creditoImagem}
+              </figcaption>
+            )}
+          </figure>
+          {planta.imagemPadrao && (
+            <figure className="relative aspect-[16/9] w-full overflow-hidden rounded-box border border-base-300 bg-base-200">
+              <Image
+                src={planta.imagemPadrao}
+                alt={`${planta.nomeComum} — foto secundária`}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+              />
+            </figure>
           )}
-          {planta.creditoImagem && (
-            <figcaption className="absolute bottom-0 right-0 bg-base-100/80 px-2 py-0.5 text-[10px] text-base-content/60">
-              {planta.creditoImagem}
-            </figcaption>
-          )}
-        </figure>
+        </div>
 
         {/* Cabeçalho + badges */}
         <div className="flex flex-col justify-center gap-3">

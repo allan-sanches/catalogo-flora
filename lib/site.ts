@@ -3,6 +3,9 @@
 /** Link do catálogo no WhatsApp (botão "Ver na loja"). */
 export const STORE_URL = "https://wa.me/c/5512988050872";
 
+/** Domínio do site (sem protocolo) — usado no rodapé dos panfletos/PDF. */
+export const SITE_DOMAIN = "catalogo-floramattos.vercel.app";
+
 /** Telefone para contato direto (wa.me com mensagem). */
 export const WHATSAPP_PHONE = "5512988050872";
 

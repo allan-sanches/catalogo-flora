@@ -47,8 +47,14 @@ export default config({
         genero: fields.text({ label: "Gênero", description: "Ex.: Alocasia" }),
         especie: fields.text({ label: "Espécie", description: "Ex.: macrorrhizos" }),
         imagem: fields.image({
-          label: "Foto",
-          description: "Foto principal da planta (faça upload aqui).",
+          label: "Foto de destaque (capa)",
+          description: "Foto principal — usada no card, no panfleto e no PDF.",
+          directory: "public/images/plantas",
+          publicPath: "/images/plantas/",
+        }),
+        imagemPadrao: fields.image({
+          label: "Foto padrão (secundária)",
+          description: "Segunda foto da planta — usada nos panfletos (refactor).",
           directory: "public/images/plantas",
           publicPath: "/images/plantas/",
         }),

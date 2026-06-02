@@ -158,16 +158,21 @@ function slugify(s) {
 
 const y = (v) => JSON.stringify(v);
 
-// Preserva foto/crédito já enviados pelo painel.
+// Preserva fotos/crédito já enviados pelo painel.
+function readCampo(fm, campo) {
+  let v = (fm.match(new RegExp(`^${campo}:\\s*(.+)$`, "m")) || [])[1]?.trim() ?? null;
+  if (!v || v === '""' || v === "null" || v === "~") v = null;
+  return v;
+}
 function readImagem(file) {
-  if (!existsSync(file)) return { imagem: null, credito: null };
+  if (!existsSync(file)) return { imagem: null, imagemPadrao: null, credito: null };
   const txt = readFileSync(file, "utf8");
   const fm = (txt.match(/^---\n([\s\S]*?)\n---/) || [, ""])[1];
-  let imagem = (fm.match(/^imagem:\s*(.+)$/m) || [])[1]?.trim() ?? null;
-  if (!imagem || imagem === '""' || imagem === "null" || imagem === "~") imagem = null;
-  let credito = (fm.match(/^creditoImagem:\s*(.+)$/m) || [])[1]?.trim() ?? null;
-  if (!credito || credito === '""') credito = null;
-  return { imagem, credito };
+  return {
+    imagem: readCampo(fm, "imagem"),
+    imagemPadrao: readCampo(fm, "imagemPadrao"),
+    credito: readCampo(fm, "creditoImagem"),
+  };
 }
 
 mkdirSync(OUT, { recursive: true });
@@ -191,6 +196,7 @@ for (const p of plants) {
     `especie: ${y(p.e)}`,
   ];
   if (prev.imagem) linhas.push(`imagem: ${prev.imagem}`);
+  if (prev.imagemPadrao) linhas.push(`imagemPadrao: ${prev.imagemPadrao}`);
   linhas.push(`creditoImagem: ${prev.credito ? prev.credito : '""'}`);
 
   linhas.push("tamanhos:");
