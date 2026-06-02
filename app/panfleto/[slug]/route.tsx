@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { reader, getMarca } from "../../reader";
+import { localImageDataUri } from "@/lib/serverImage";
 
 export const dynamic = "force-dynamic";
 
@@ -56,7 +57,9 @@ export async function GET(
   const W = 1080;
   const H = formato === "feed" ? 1350 : 1920;
 
-  const foto = planta.imagem ? `${origin}${planta.imagem}` : null;
+  const foto =
+    (await localImageDataUri(planta.imagem)) ??
+    (planta.imagem ? `${origin}${planta.imagem}` : null);
   const { node } = await planta.descricao();
   let descricao = nodeToText(node).replace(/\s+/g, " ").trim();
   const limite = formato === "feed" ? 150 : 230;

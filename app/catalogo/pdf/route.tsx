@@ -10,6 +10,7 @@ import {
   renderToBuffer,
 } from "@react-pdf/renderer";
 import { getPlantas, getMarca } from "../../reader";
+import { localImageDataUri } from "@/lib/serverImage";
 
 export const dynamic = "force-dynamic";
 
@@ -21,149 +22,104 @@ const CREME = "#FBF8F2";
 const CINZA = "#4B5563";
 
 const s = StyleSheet.create({
-  page: {
-    paddingTop: 54,
-    paddingBottom: 56,
-    paddingHorizontal: 44,
-    fontSize: 9,
-    color: "#1f2937",
-    fontFamily: "Helvetica",
-  },
   // capa
   cover: { padding: 0, backgroundColor: BEGE_CLARO },
-  coverBox: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 60,
-  },
+  coverBox: { flex: 1, alignItems: "center", justifyContent: "center", padding: 60 },
   brandName: { fontSize: 40, color: VERDE, fontFamily: "Helvetica-Bold", marginTop: 18 },
-  brandSub: {
-    fontSize: 13,
-    letterSpacing: 6,
-    color: VERDE_CLARO,
-    textTransform: "uppercase",
-    marginTop: 4,
-  },
+  brandSub: { fontSize: 13, letterSpacing: 6, color: VERDE_CLARO, textTransform: "uppercase", marginTop: 4 },
   rule: { width: 90, height: 2, backgroundColor: VERDE_CLARO, marginVertical: 26 },
   coverTitle: { fontSize: 22, color: VERDE, fontFamily: "Helvetica-Bold" },
   coverMeta: { fontSize: 11, color: CINZA, marginTop: 10 },
+
   // índice
+  page: { paddingTop: 54, paddingBottom: 56, paddingHorizontal: 44, fontSize: 9, color: "#1f2937", fontFamily: "Helvetica" },
   h1: { fontSize: 20, color: VERDE, fontFamily: "Helvetica-Bold", marginBottom: 14 },
-  idxFam: {
-    fontSize: 13,
-    color: VERDE,
-    fontFamily: "Helvetica-Bold",
-    marginTop: 12,
-    marginBottom: 2,
-  },
+  idxFam: { fontSize: 13, color: VERDE, fontFamily: "Helvetica-Bold", marginTop: 12, marginBottom: 2 },
   idxGen: { fontSize: 10, color: VERDE_CLARO, fontFamily: "Helvetica-Bold", marginTop: 6 },
   idxItem: { fontSize: 9, color: CINZA, marginLeft: 10, marginTop: 1.5 },
-  // entradas
-  famHeader: {
-    fontSize: 18,
-    color: CREME,
-    backgroundColor: VERDE,
-    fontFamily: "Helvetica-Bold",
-    padding: "8px 12px",
-    borderRadius: 4,
-    marginBottom: 10,
-    marginTop: 6,
-  },
-  genHeader: {
-    fontSize: 13,
-    color: VERDE,
-    fontFamily: "Helvetica-Oblique",
-    marginTop: 12,
-    marginBottom: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: BEGE,
-    paddingBottom: 3,
-  },
-  card: {
-    flexDirection: "row",
-    gap: 12,
-    padding: 10,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: "#E7E1D4",
-    borderRadius: 6,
-    backgroundColor: "#FFFFFF",
-  },
-  thumb: { width: 78, height: 78, borderRadius: 6, objectFit: "cover" },
-  thumbPh: {
-    width: 78,
-    height: 78,
-    borderRadius: 6,
-    backgroundColor: BEGE_CLARO,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  nome: { fontSize: 12, color: "#111827", fontFamily: "Helvetica-Bold" },
-  cient: { fontSize: 9.5, color: CINZA, fontStyle: "italic", marginTop: 1 },
-  tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 4, marginTop: 5 },
-  tag: {
-    fontSize: 7.5,
-    color: VERDE,
-    backgroundColor: BEGE_CLARO,
-    padding: "2px 5px",
-    borderRadius: 3,
-  },
-  dist: { fontSize: 8, color: "#6B7280", marginTop: 5 },
-  fonte: { fontSize: 7, color: "#9CA3AF", marginTop: 3, fontStyle: "italic" },
-  preco: { fontSize: 11, color: VERDE, fontFamily: "Helvetica-Bold", marginTop: 5 },
-  header: {
-    position: "absolute",
-    top: 20,
-    left: 44,
-    right: 44,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    fontSize: 8,
-    color: VERDE_CLARO,
-  },
-  footer: {
-    position: "absolute",
-    bottom: 22,
-    left: 44,
-    right: 44,
-    textAlign: "center",
-    fontSize: 8,
-    color: "#9CA3AF",
-  },
+
+  // post (1 planta por página)
+  post: { paddingTop: 0, paddingBottom: 46, paddingHorizontal: 0, fontFamily: "Helvetica", color: "#1f2937", backgroundColor: CREME },
+  topbar: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: VERDE, paddingVertical: 14, paddingHorizontal: 34 },
+  topbarName: { fontSize: 15, color: CREME, fontFamily: "Helvetica-Bold" },
+  topbarSub: { fontSize: 8, color: BEGE, letterSpacing: 2, textTransform: "uppercase" },
+  hero: { width: "100%", height: 300, objectFit: "cover", backgroundColor: BEGE_CLARO },
+  heroPh: { width: "100%", height: 300, backgroundColor: BEGE_CLARO, alignItems: "center", justifyContent: "center" },
+  body: { paddingHorizontal: 40, paddingTop: 22 },
+  nome: { fontSize: 26, color: VERDE, fontFamily: "Helvetica-Bold" },
+  cient: { fontSize: 13, color: CINZA, fontStyle: "italic", marginTop: 2 },
+  badges: { flexDirection: "row", flexWrap: "wrap", gap: 5, marginTop: 12 },
+  badge: { fontSize: 9, color: VERDE, backgroundColor: BEGE_CLARO, paddingVertical: 3, paddingHorizontal: 8, borderRadius: 10 },
+  badgeWarn: { fontSize: 9, color: "#7c2d12", backgroundColor: "#fde68a", paddingVertical: 3, paddingHorizontal: 8, borderRadius: 10 },
+  desc: { fontSize: 11.5, lineHeight: 1.5, color: "#374151", marginTop: 16 },
+  grid: { flexDirection: "row", flexWrap: "wrap", marginTop: 16, borderTopWidth: 1, borderTopColor: BEGE },
+  cell: { width: "50%", paddingVertical: 6, paddingRight: 10 },
+  cellLabel: { fontSize: 8, color: VERDE_CLARO, textTransform: "uppercase", letterSpacing: 1 },
+  cellValue: { fontSize: 11, color: "#1f2937", marginTop: 1 },
+  precoTitle: { fontSize: 9, color: VERDE_CLARO, textTransform: "uppercase", letterSpacing: 1, marginTop: 16, marginBottom: 4 },
+  precoRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 3 },
+  precoTam: { fontSize: 9, color: VERDE, backgroundColor: BEGE_CLARO, paddingVertical: 2, paddingHorizontal: 7, borderRadius: 8, fontFamily: "Helvetica-Bold" },
+  precoVal: { fontSize: 12, color: VERDE, fontFamily: "Helvetica-Bold" },
+  precoDe: { fontSize: 9, color: "#9CA3AF", textDecoration: "line-through" },
+  fonte: { fontSize: 8, color: "#9CA3AF", fontStyle: "italic", marginTop: 16 },
+
+  footer: { position: "absolute", bottom: 20, left: 40, right: 40, flexDirection: "row", justifyContent: "space-between", fontSize: 8, color: "#9CA3AF" },
+  headerFix: { position: "absolute", top: 20, left: 44, right: 44, flexDirection: "row", justifyContent: "space-between", fontSize: 8, color: VERDE_CLARO },
 });
 
 const LEAF =
   "M32 4c-2 9-9 13-17 15 2 1 4 3 5 5-6 1-11 5-14 11 8 1 14-1 19-5-1 6-4 11-9 15 8 0 14-4 18-11 1 8 1 14-2 21 6-4 9-11 9-19 4 6 6 13 5 21 5-6 7-13 6-21 4 3 9 4 15 4-3-6-8-10-14-12 2-2 4-4 7-5-8-2-14-7-16-15-5 4-9 9-12 16-2-6-2-12-0-19z";
 
-function Leaf({ size }: { size: number }) {
+function Leaf({ size, color = VERDE }: { size: number; color?: string }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 64 64">
-      <Path d={LEAF} fill={VERDE} />
+      <Path d={LEAF} fill={color} />
     </Svg>
   );
 }
 
-function precoResumo(tamanhos: { preco: string }[]) {
-  const nums = tamanhos
-    .map((t) => Number((t.preco || "").replace(/\./g, "").replace(",", ".")))
-    .filter((n) => Number.isFinite(n) && n > 0);
-  if (nums.length === 0) return "Consultar";
-  const min = Math.min(...nums);
-  const txt = `R$ ${min.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
-  return nums.length > 1 ? `a partir de ${txt}` : txt;
+function parsePreco(v: string) {
+  const n = Number((v || "").replace(/\./g, "").replace(",", "."));
+  return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-export async function GET(request: Request) {
-  const origin = new URL(request.url).origin;
-  const [plantas, marca] = await Promise.all([getPlantas(), getMarca()]);
-  const data = new Date().toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
+// Extrai texto puro do nó Markdoc da descrição.
+function nodeToText(node: unknown): string {
+  if (!node || typeof node !== "object") return "";
+  const n = node as { attributes?: { content?: unknown }; children?: unknown[] };
+  let out = "";
+  if (typeof n.attributes?.content === "string") out += n.attributes.content;
+  if (Array.isArray(n.children)) for (const c of n.children) out += nodeToText(c) + " ";
+  return out;
+}
 
-  // agrupa: família -> gênero -> plantas
+export async function GET() {
+  const [plantas, marca] = await Promise.all([getPlantas(), getMarca()]);
+  const data = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+
+  // pré-carrega imagens (data URI) — evita depender de HTTP na Vercel
+  const fotos: Record<string, string | null> = {};
+  await Promise.all(
+    plantas.map(async (p) => {
+      fotos[p.slug] = await localImageDataUri(p.imagem);
+    })
+  );
+  const logoData = await localImageDataUri(marca.logoUrl);
+
+  // pré-carrega as descrições (texto puro do Markdoc)
+  const descricoes: Record<string, string> = {};
+  await Promise.all(
+    plantas.map(async (p) => {
+      try {
+        const { node } = await (p as { descricao: () => Promise<{ node: unknown }> }).descricao();
+        descricoes[p.slug] = nodeToText(node).replace(/\s+/g, " ").trim();
+      } catch {
+        descricoes[p.slug] = "";
+      }
+    })
+  );
+
+  // índice: família -> gênero
   const fam = new Map<string, Map<string, typeof plantas>>();
   for (const p of plantas) {
     const f = p.familia?.trim() || "Outros";
@@ -177,26 +133,26 @@ export async function GET(request: Request) {
     .map(([f, gmap]) => ({
       familia: f,
       generos: [...gmap.entries()]
-        .map(([g, lista]) => ({
-          genero: g,
-          lista: [...lista].sort((a, b) =>
-            a.nomeComum.localeCompare(b.nomeComum, "pt-BR")
-          ),
-        }))
+        .map(([g, lista]) => ({ genero: g, lista: [...lista].sort((a, b) => a.nomeComum.localeCompare(b.nomeComum, "pt-BR")) }))
         .sort((a, b) => a.genero.localeCompare(b.genero, "pt-BR")),
     }))
     .sort((a, b) => a.familia.localeCompare(b.familia, "pt-BR"));
 
-  const logoSrc = marca.logoUrl ? `${origin}${marca.logoUrl}` : null;
+  // ordem dos posts: por família, gênero, nome
+  const ordenadas = familias.flatMap((f) => f.generos.flatMap((g) => g.lista));
+
+  const Footer = () => (
+    <Text style={s.footer} fixed render={({ pageNumber, totalPages }) => `${marca.nome} · ${marca.subtitulo}                                                                 ${pageNumber} / ${totalPages}`} />
+  );
 
   const doc = (
     <Document title={`Catálogo ${marca.nome}`} author={marca.nome}>
       {/* CAPA */}
       <Page size="A4" style={s.cover}>
         <View style={s.coverBox}>
-          {logoSrc ? (
+          {logoData ? (
             // eslint-disable-next-line jsx-a11y/alt-text
-            <Image src={logoSrc} style={{ width: 130, height: 130, objectFit: "contain" }} />
+            <Image src={logoData} style={{ width: 140, height: 140, objectFit: "contain" }} />
           ) : (
             <Leaf size={96} />
           )}
@@ -204,20 +160,18 @@ export async function GET(request: Request) {
           <Text style={s.brandSub}>{marca.subtitulo}</Text>
           <View style={s.rule} />
           <Text style={s.coverTitle}>Catálogo de Plantas</Text>
-          <Text style={s.coverMeta}>
-            {plantas.length} plantas · {familias.length} família(s)
-          </Text>
+          <Text style={s.coverMeta}>{plantas.length} plantas · {familias.length} família(s)</Text>
           <Text style={s.coverMeta}>Atualizado em {data}</Text>
           <Text style={[s.coverMeta, { fontSize: 8, marginTop: 16, maxWidth: 360, textAlign: "center" }]}>
-            Dados botânicos verificados na Flora e Funga do Brasil (JBRJ),
-            POWO/Kew e aroid.org.
+            Dados botânicos verificados na Flora e Funga do Brasil (JBRJ), POWO/Kew e aroid.org.
           </Text>
         </View>
+        <Footer />
       </Page>
 
       {/* ÍNDICE */}
       <Page size="A4" style={s.page}>
-        <View style={s.header} fixed>
+        <View style={s.headerFix} fixed>
           <Text>{marca.nome}</Text>
           <Text>Índice</Text>
         </View>
@@ -227,83 +181,115 @@ export async function GET(request: Request) {
             <Text style={s.idxFam}>{f.familia}</Text>
             {f.generos.map((g) => (
               <View key={g.genero}>
-                <Text style={s.idxGen}>
-                  {g.genero} ({g.lista.length})
-                </Text>
+                <Text style={s.idxGen}>{g.genero} ({g.lista.length})</Text>
                 {g.lista.map((p) => (
-                  <Text key={p.slug} style={s.idxItem}>
-                    • {p.nomeComum} — {p.nomeCientifico}
-                  </Text>
+                  <Text key={p.slug} style={s.idxItem}>• {p.nomeComum} — {p.nomeCientifico}</Text>
                 ))}
               </View>
             ))}
           </View>
         ))}
-        <Text style={s.footer} fixed render={({ pageNumber }) => `${pageNumber}`} />
+        <Footer />
       </Page>
 
-      {/* ENTRADAS */}
-      <Page size="A4" style={s.page} wrap>
-        <View style={s.header} fixed>
-          <Text>{marca.nome}</Text>
-          <Text>Catálogo · {data}</Text>
-        </View>
+      {/* UM POST POR PLANTA */}
+      {ordenadas.map((p) => {
+        const foto = fotos[p.slug];
+        const tamanhos = [...p.tamanhos];
+        return (
+          <Page key={p.slug} size="A4" style={s.post}>
+            <View style={s.topbar}>
+              {logoData ? (
+                // eslint-disable-next-line jsx-a11y/alt-text
+                <Image src={logoData} style={{ width: 26, height: 26, objectFit: "contain" }} />
+              ) : (
+                <Leaf size={22} color={CREME} />
+              )}
+              <View>
+                <Text style={s.topbarName}>{marca.nome}</Text>
+                <Text style={s.topbarSub}>{marca.subtitulo}</Text>
+              </View>
+            </View>
 
-        {familias.map((f) => (
-          <View key={f.familia}>
-            <Text style={s.famHeader}>{f.familia}</Text>
-            {f.generos.map((g) => (
-              <View key={g.genero}>
-                <Text style={s.genHeader}>{g.genero}</Text>
-                {g.lista.map((p) => (
-                  <View key={p.slug} style={s.card} wrap={false}>
-                    {p.imagem ? (
-                      // eslint-disable-next-line jsx-a11y/alt-text
-                      <Image src={`${origin}${p.imagem}`} style={s.thumb} />
-                    ) : (
-                      <View style={s.thumbPh}>
-                        <Leaf size={36} />
-                      </View>
-                    )}
-                    <View style={{ flex: 1 }}>
-                      <Text style={s.nome}>{p.nomeComum}</Text>
-                      <Text style={s.cient}>
-                        {p.nomeCientifico}
-                        {p.autor ? ` ${p.autor}` : ""}
+            {foto ? (
+              // eslint-disable-next-line jsx-a11y/alt-text
+              <Image src={foto} style={s.hero} />
+            ) : (
+              <View style={s.heroPh}>
+                <Leaf size={72} color={VERDE_CLARO} />
+              </View>
+            )}
+
+            <View style={s.body}>
+              <Text style={s.nome}>{p.nomeComum}</Text>
+              <Text style={s.cient}>
+                {p.nomeCientifico}{p.autor ? ` ${p.autor}` : ""}
+              </Text>
+
+              <View style={s.badges}>
+                <Text style={s.badge}>{p.familia}</Text>
+                {p.origem ? <Text style={s.badge}>{p.origem}</Text> : null}
+                {(p.luminosidade || []).map((l) => (
+                  <Text key={l} style={s.badge}>{l}</Text>
+                ))}
+                {p.formaVida ? <Text style={s.badge}>{p.formaVida}</Text> : null}
+                {p.toxica ? <Text style={s.badgeWarn}>Tóxica</Text> : null}
+              </View>
+
+              {descricoes[p.slug] ? <Text style={s.desc}>{descricoes[p.slug]}</Text> : null}
+
+              <View style={s.grid}>
+                <View style={s.cell}>
+                  <Text style={s.cellLabel}>Gênero / Espécie</Text>
+                  <Text style={s.cellValue}>{p.genero} {p.especie}</Text>
+                </View>
+                <View style={s.cell}>
+                  <Text style={s.cellLabel}>Origem</Text>
+                  <Text style={s.cellValue}>{p.origem || "—"}</Text>
+                </View>
+                <View style={s.cell}>
+                  <Text style={s.cellLabel}>Distribuição</Text>
+                  <Text style={s.cellValue}>{p.distribuicao || "—"}</Text>
+                </View>
+                <View style={s.cell}>
+                  <Text style={s.cellLabel}>Luminosidade</Text>
+                  <Text style={s.cellValue}>{(p.luminosidade || []).join(", ") || "—"}</Text>
+                </View>
+                <View style={s.cell}>
+                  <Text style={s.cellLabel}>Substrato</Text>
+                  <Text style={s.cellValue}>{(p.substrato || []).join(", ") || "—"}</Text>
+                </View>
+                <View style={s.cell}>
+                  <Text style={s.cellLabel}>Rega</Text>
+                  <Text style={s.cellValue}>{p.rega || "—"}</Text>
+                </View>
+              </View>
+
+              <Text style={s.precoTitle}>Tamanhos e preços</Text>
+              {tamanhos.length === 0 ? (
+                <Text style={s.cellValue}>Consultar</Text>
+              ) : (
+                tamanhos.map((t, i) => {
+                  const v = parsePreco(t.preco);
+                  return (
+                    <View key={i} style={s.precoRow}>
+                      <Text style={s.precoTam}>{t.tamanho}</Text>
+                      <Text style={s.precoVal}>
+                        {v ? `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "Consultar"}
                       </Text>
-                      <View style={s.tagRow}>
-                        {p.origem ? <Text style={s.tag}>{p.origem}</Text> : null}
-                        {(p.luminosidade || []).map((l) => (
-                          <Text key={l} style={s.tag}>
-                            {l}
-                          </Text>
-                        ))}
-                        {p.formaVida ? <Text style={s.tag}>{p.formaVida}</Text> : null}
-                        {p.toxica ? <Text style={s.tag}>Tóxica</Text> : null}
-                      </View>
-                      {p.distribuicao ? (
-                        <Text style={s.dist}>{p.distribuicao}</Text>
-                      ) : null}
-                      {p.fonte ? (
-                        <Text style={s.fonte}>Fonte: {p.fonte}</Text>
-                      ) : null}
-                      <Text style={s.preco}>{precoResumo([...p.tamanhos])}</Text>
+                      {t.precoDe ? <Text style={s.precoDe}>R$ {t.precoDe}</Text> : null}
                     </View>
-                  </View>
-                ))}
-              </View>
-            ))}
-          </View>
-        ))}
+                  );
+                })
+              )}
 
-        <Text
-          style={s.footer}
-          fixed
-          render={({ pageNumber, totalPages }) =>
-            `${marca.nome} · ${marca.subtitulo} — página ${pageNumber} de ${totalPages}`
-          }
-        />
-      </Page>
+              {p.fonte ? <Text style={s.fonte}>Fonte: {p.fonte}</Text> : null}
+            </View>
+
+            <Footer />
+          </Page>
+        );
+      })}
     </Document>
   );
 
