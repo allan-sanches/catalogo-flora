@@ -6,13 +6,17 @@ export const markdocConfig = {
 };
 
 export default config({
-  // Storage GitHub quando as credenciais existem (produção com env configurada)
-  // OU em desenvolvimento (pra fazer o onboarding que cria a GitHub App).
-  // Sem credenciais em produção, cai para `local` — assim o 1º deploy na Vercel
-  // não falha e o site público sobe; depois é só adicionar as env vars e editar.
+  // Storage GitHub quando a App está configurada (produção com env) OU em dev
+  // (para o onboarding criar a App). Sem isso em produção, cai para `local`,
+  // assim o 1º deploy na Vercel não falha e o site público sobe.
+  //
+  // IMPORTANTE: este config também é importado pelo painel no CLIENTE, então a
+  // condição usa apenas variáveis visíveis ao cliente (NODE_ENV e NEXT_PUBLIC_*).
+  // Usar uma var só-de-servidor aqui faz o cliente achar que é `local` (erro
+  // "Unable to load collection / Not Found").
   storage:
     process.env.NODE_ENV !== "production" ||
-    process.env.KEYSTATIC_GITHUB_CLIENT_ID
+    process.env.NEXT_PUBLIC_KEYSTATIC_GITHUB_APP_SLUG
       ? { kind: "github", repo: "allan-sanches/catalogo-flora" }
       : { kind: "local" },
   ui: {
