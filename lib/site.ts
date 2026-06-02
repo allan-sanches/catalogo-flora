@@ -25,7 +25,7 @@ export type Tamanho = {
   tamanho: string;
   preco: string;
   precoDe: string;
-  disponivel: boolean;
+  situacao: string;
 };
 
 /** Converte "1.290,00" -> 1290.0; retorna null se vazio/inválido. */

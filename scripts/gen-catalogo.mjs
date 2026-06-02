@@ -204,7 +204,7 @@ for (const p of plants) {
     linhas.push(`  - tamanho: ${y(tamanho)}`);
     linhas.push(`    preco: ${y(preco || "")}`);
     linhas.push(`    precoDe: ${y(precoDe || "")}`);
-    linhas.push(`    disponivel: true`);
+    linhas.push(`    situacao: "Disponível"`);
   }
 
   linhas.push(`origem: ${y(p.o)}`);

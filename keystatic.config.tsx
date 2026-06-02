@@ -79,9 +79,14 @@ export default config({
               label: "Preço 'de' (promoção)",
               description: "Valor antigo riscado, ex.: 120,00. Opcional.",
             }),
-            disponivel: fields.checkbox({
-              label: "Disponível",
-              defaultValue: true,
+            situacao: fields.select({
+              label: "Situação",
+              options: [
+                { label: "Disponível", value: "Disponível" },
+                { label: "Indisponível", value: "Indisponível" },
+                { label: "Sob encomenda", value: "Sob encomenda" },
+              ],
+              defaultValue: "Disponível",
             }),
           }),
           {
@@ -89,7 +94,7 @@ export default config({
             itemLabel: (props) =>
               `${props.fields.tamanho.value}${
                 props.fields.preco.value ? ` — R$ ${props.fields.preco.value}` : ""
-              }`,
+              } · ${props.fields.situacao.value}`,
           }
         ),
         origem: fields.select({

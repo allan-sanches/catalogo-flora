@@ -1,6 +1,16 @@
 import { resumoPreco, type Tamanho } from "@/lib/site";
 import InterestButton from "./InterestButton";
 
+/** Badge da situação do tamanho (Indisponível / Sob encomenda). */
+function SituacaoBadge({ situacao }: { situacao: string }) {
+  if (!situacao || situacao === "Disponível") return null;
+  const cls =
+    situacao === "Indisponível"
+      ? "badge-ghost text-base-content/60"
+      : "badge-warning badge-outline";
+  return <span className={`badge badge-sm ${cls}`}>{situacao}</span>;
+}
+
 /** Espaço reservado mostrado quando os preços estão ocultos. */
 function Mascara({ small = false }: { small?: boolean }) {
   return (
@@ -80,9 +90,7 @@ export function TabelaTamanhos({
               ) : (
                 <span className="text-base-content/60">Consultar</span>
               )}
-              {!t.disponivel && (
-                <span className="badge badge-ghost badge-sm">Indisponível</span>
-              )}
+              <SituacaoBadge situacao={t.situacao} />
             </div>
             <InterestButton
               nome={nome}

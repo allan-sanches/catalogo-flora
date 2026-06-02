@@ -24,7 +24,7 @@ export default async function SiteLayout({
       tamanho: t.tamanho,
       preco: t.preco,
       precoDe: t.precoDe,
-      disponivel: t.disponivel,
+      situacao: t.situacao,
     })),
   }));
 
