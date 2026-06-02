@@ -51,10 +51,11 @@ const s = StyleSheet.create({
   topbar: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: CREME, paddingVertical: 12, paddingHorizontal: 34 },
   topbarName: { fontSize: 15, color: VERDE, fontFamily: "Helvetica-Bold" },
   topbarSub: { fontSize: 8, color: VERDE_CLARO, letterSpacing: 2, textTransform: "uppercase" },
-  heroWrap: { position: "relative", width: "100%", backgroundColor: BEGE_CLARO },
   hero: { width: "100%", height: 320, objectFit: "contain", backgroundColor: BEGE_CLARO },
   heroPh: { width: "100%", height: 320, backgroundColor: BEGE_CLARO, alignItems: "center", justifyContent: "center" },
-  detailCircle: { position: "absolute", bottom: 14, right: 22, width: 150, height: 150, borderRadius: 75, objectFit: "cover", border: `5px solid ${CREME}` },
+  heroRow: { flexDirection: "row", width: "100%", height: 320, backgroundColor: BEGE_CLARO },
+  heroHalf: { width: "50%", height: 320, alignItems: "center", justifyContent: "center", backgroundColor: BEGE_CLARO },
+  heroImg: { width: "100%", height: 320, objectFit: "contain" },
   ctaBar: { position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: VERDE, paddingVertical: 12, alignItems: "center" },
   ctaTitle: { fontSize: 12, color: CREME, fontFamily: "Helvetica-Bold", letterSpacing: 1 },
   ctaUrl: { fontSize: 9, color: BEGE, marginTop: 2 },
@@ -121,7 +122,7 @@ export async function GET() {
         localImageDataUri(p.imagemPadrao),
       ]);
       fotos[p.slug] = pr;
-      detalhes[p.slug] = dt ?? pr; // usa a foto principal se não houver detalhe
+      detalhes[p.slug] = dt; // null se não houver 2ª foto
     })
   );
   const [logoData, logoHorizData] = await Promise.all([
@@ -266,20 +267,29 @@ export async function GET() {
               )}
             </View>
 
-            <View style={s.heroWrap}>
-              {foto ? (
-                // eslint-disable-next-line jsx-a11y/alt-text
-                <Image src={foto} style={s.hero} />
-              ) : (
-                <View style={s.heroPh}>
-                  <Leaf size={72} color={VERDE_CLARO} />
+            {detalhe ? (
+              <View style={s.heroRow}>
+                <View style={[s.heroHalf, { borderRight: `2px solid ${CREME}` }]}>
+                  {foto ? (
+                    // eslint-disable-next-line jsx-a11y/alt-text
+                    <Image src={foto} style={s.heroImg} />
+                  ) : (
+                    <Leaf size={64} color={VERDE_CLARO} />
+                  )}
                 </View>
-              )}
-              {detalhe ? (
-                // eslint-disable-next-line jsx-a11y/alt-text
-                <Image src={detalhe} style={s.detailCircle} />
-              ) : null}
-            </View>
+                <View style={s.heroHalf}>
+                  {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                  <Image src={detalhe} style={s.heroImg} />
+                </View>
+              </View>
+            ) : foto ? (
+              // eslint-disable-next-line jsx-a11y/alt-text
+              <Image src={foto} style={s.hero} />
+            ) : (
+              <View style={s.heroPh}>
+                <Leaf size={72} color={VERDE_CLARO} />
+              </View>
+            )}
 
             <View style={s.body}>
               <Text style={s.nome}>{p.nomeComum}</Text>
