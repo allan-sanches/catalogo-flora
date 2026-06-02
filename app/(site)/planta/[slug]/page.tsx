@@ -105,7 +105,7 @@ export default async function PlantaPage({
         </div>
 
         {/* Cabeçalho + badges */}
-        <div className="flex flex-col justify-center gap-3">
+        <div className="flex flex-col justify-start gap-3">
           <div>
             <h1 className="text-3xl font-bold leading-tight">
               {planta.nomeComum}
