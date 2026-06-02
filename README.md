@@ -25,9 +25,11 @@ Cada planta é um arquivo em [`content/plantas/`](content/plantas/) com frontmat
 
 ## Deploy na Vercel
 
-O Keystatic usa **storage GitHub** (repo `allan-sanches/catalogo-flora`) — ver [`keystatic.config.tsx`](keystatic.config.tsx). O build de produção **exige** as variáveis da GitHub App, então crie a App **antes** de deployar:
+O Keystatic usa **storage GitHub** quando as credenciais existem; sem elas em produção, cai para `local` — então o **primeiro deploy não falha** e o site público sobe normalmente. Ver [`keystatic.config.tsx`](keystatic.config.tsx).
 
-**1. Crie a GitHub App (gera as variáveis) — rode localmente:**
+**1. Importe o repo na Vercel** (`allan-sanches/catalogo-flora`). Build `next build` detectado automaticamente → o **site público já fica no ar** (catálogo, PDF, panfletos).
+
+**2. Para habilitar a edição/upload pelo painel hospedado**, crie a GitHub App (uma vez), rodando localmente:
 ```bash
 npm run dev
 ```
@@ -37,10 +39,6 @@ Abra **http://localhost:3000/keystatic** → **"Connect to GitHub"**. O Keystati
 - `KEYSTATIC_GITHUB_CLIENT_SECRET`
 - `NEXT_PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`
 
-**2. Importe o repo na Vercel** (`allan-sanches/catalogo-flora`) — build `next build` detectado automaticamente.
+**3. Em Vercel → Project → Settings → Environment Variables**, cole essas 4 variáveis (Production/Preview/Development) e **Redeploy**. Veja [`.env.example`](.env.example).
 
-**3. Em Vercel → Project → Settings → Environment Variables**, cole as 4 variáveis acima (todos os ambientes). Veja [`.env.example`](.env.example).
-
-**4. Deploy.** O site público é estático/SSR (lê o conteúdo commitado em `content/`). Editar/subir fotos pelo painel `/keystatic` hospedado vira **commit no GitHub**, que dispara um novo deploy automático.
-
-> Sem as variáveis, o `next build` falha de propósito (lembrete do Keystatic). Por isso o passo 1 vem antes do deploy.
+**4. Pronto.** Agora `/keystatic` hospedado edita o conteúdo gravando **commits no GitHub**, que disparam novo deploy automático. O site é estático/SSR e lê o conteúdo commitado em `content/`.

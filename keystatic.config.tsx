@@ -6,9 +6,15 @@ export const markdocConfig = {
 };
 
 export default config({
-  // Storage GitHub: edições pelo painel viram commits no repo.
-  // O onboarding em /keystatic cria a GitHub App e gera as variáveis de ambiente.
-  storage: { kind: "github", repo: "allan-sanches/catalogo-flora" },
+  // Storage GitHub quando as credenciais existem (produção com env configurada)
+  // OU em desenvolvimento (pra fazer o onboarding que cria a GitHub App).
+  // Sem credenciais em produção, cai para `local` — assim o 1º deploy na Vercel
+  // não falha e o site público sobe; depois é só adicionar as env vars e editar.
+  storage:
+    process.env.NODE_ENV !== "production" ||
+    process.env.KEYSTATIC_GITHUB_CLIENT_ID
+      ? { kind: "github", repo: "allan-sanches/catalogo-flora" }
+      : { kind: "local" },
   ui: {
     brand: { name: "Flora Mattos" },
   },
