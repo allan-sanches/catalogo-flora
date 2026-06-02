@@ -4,6 +4,7 @@ import "./globals.css";
 
 const lora = Lora({
   subsets: ["latin"],
+  style: ["normal", "italic"],
   variable: "--font-lora",
   display: "swap",
 });
@@ -11,6 +12,7 @@ const lora = Lora({
 const montserratAlternates = Montserrat_Alternates({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
   variable: "--font-montserrat-alternates",
   display: "swap",
 });

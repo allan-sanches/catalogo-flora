@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Smartphone, Square, ExternalLink } from "lucide-react";
+import { Smartphone, Square, ExternalLink, Download } from "lucide-react";
 
 export default function PanfletoControls({ slug }: { slug: string }) {
   const [formato, setFormato] = useState<"story" | "feed">("story");
@@ -54,9 +54,18 @@ export default function PanfletoControls({ slug }: { slug: string }) {
         </label>
       </div>
 
-      <a href={href} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm gap-2">
-        <ExternalLink className="h-4 w-4" /> Abrir panfleto
-      </a>
+      <div className="flex flex-wrap gap-2 pt-1">
+        <a href={href} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm gap-2">
+          <ExternalLink className="h-4 w-4" /> Abrir panfleto
+        </a>
+        <a
+          href={href}
+          download={`panfleto-${slug}-${formato}${preco ? "-com-preco" : ""}-${logo}.png`}
+          className="btn btn-primary btn-outline btn-sm gap-2"
+        >
+          <Download className="h-4 w-4" /> Baixar
+        </a>
+      </div>
     </div>
   );
 }
