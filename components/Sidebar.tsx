@@ -300,12 +300,14 @@ export default function Sidebar({
         >
           <FileDown className="h-4 w-4" /> Baixar catálogo (PDF)
         </a>
-        <Link
+        <a
           href="/keystatic"
+          target="_blank"
+          rel="noopener noreferrer"
           className="btn btn-ghost btn-sm w-full justify-start gap-2 text-base-content/60"
         >
           <Settings className="h-4 w-4" /> Painel de edição
-        </Link>
+        </a>
       </div>
     </aside>
   );
