@@ -6,11 +6,9 @@ export const markdocConfig = {
 };
 
 export default config({
-  storage: {
-    // Localmente edita os arquivos em /content. Para editar pelo painel
-    // hospedado na Vercel, troque para { kind: 'github', repo: 'org/repo' }.
-    kind: "local",
-  },
+  // Storage GitHub: edições pelo painel viram commits no repo.
+  // O onboarding em /keystatic cria a GitHub App e gera as variáveis de ambiente.
+  storage: { kind: "github", repo: "allan-sanches/catalogo-flora" },
   ui: {
     brand: { name: "Flora Mattos" },
   },

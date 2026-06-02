@@ -25,6 +25,22 @@ Cada planta é um arquivo em [`content/plantas/`](content/plantas/) com frontmat
 
 ## Deploy na Vercel
 
-1. Suba o repositório no GitHub e importe na Vercel (o build é `next build`, detectado automaticamente).
-2. O catálogo é renderizado a partir dos arquivos em `content/` (commit no repositório).
-3. Para **editar o conteúdo pelo painel hospedado**, troque a `storage` em [`keystatic.config.tsx`](keystatic.config.tsx) de `{ kind: 'local' }` para `{ kind: 'github', repo: 'usuario/repo' }` e configure a GitHub App do Keystatic. No modo `local`, o painel funciona apenas em desenvolvimento (o filesystem da Vercel é somente leitura).
+O Keystatic usa **storage GitHub** (repo `allan-sanches/catalogo-flora`) — ver [`keystatic.config.tsx`](keystatic.config.tsx). O build de produção **exige** as variáveis da GitHub App, então crie a App **antes** de deployar:
+
+**1. Crie a GitHub App (gera as variáveis) — rode localmente:**
+```bash
+npm run dev
+```
+Abra **http://localhost:3000/keystatic** → **"Connect to GitHub"**. O Keystatic cria a GitHub App e grava no seu `.env` local:
+- `KEYSTATIC_SECRET`
+- `KEYSTATIC_GITHUB_CLIENT_ID`
+- `KEYSTATIC_GITHUB_CLIENT_SECRET`
+- `NEXT_PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`
+
+**2. Importe o repo na Vercel** (`allan-sanches/catalogo-flora`) — build `next build` detectado automaticamente.
+
+**3. Em Vercel → Project → Settings → Environment Variables**, cole as 4 variáveis acima (todos os ambientes). Veja [`.env.example`](.env.example).
+
+**4. Deploy.** O site público é estático/SSR (lê o conteúdo commitado em `content/`). Editar/subir fotos pelo painel `/keystatic` hospedado vira **commit no GitHub**, que dispara um novo deploy automático.
+
+> Sem as variáveis, o `next build` falha de propósito (lembrete do Keystatic). Por isso o passo 1 vem antes do deploy.
