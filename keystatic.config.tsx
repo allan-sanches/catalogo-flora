@@ -166,9 +166,16 @@ export default config({
       path: "content/marca",
       schema: {
         logo: fields.image({
-          label: "Logo",
+          label: "Logo vertical",
           description:
-            "Logotipo exibido na barra lateral e no topo. PNG/SVG com fundo transparente fica melhor.",
+            "Logo na vertical (marca + texto empilhados). Usado por padrão nos panfletos.",
+          directory: "public/images/marca",
+          publicPath: "/images/marca/",
+        }),
+        logoHorizontal: fields.image({
+          label: "Logo horizontal (alternativo)",
+          description:
+            "Versão horizontal do logo. Usada no topo do site e como opção nos panfletos.",
           directory: "public/images/marca",
           publicPath: "/images/marca/",
         }),

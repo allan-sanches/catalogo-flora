@@ -146,9 +146,9 @@ export default function Sidebar({
   const searching = query.trim().length > 0 || activeCount > 0;
 
   return (
-    <aside className="flex h-full w-72 shrink-0 flex-col border-r border-base-300 bg-base-100">
+    <aside className="flex h-full w-72 shrink-0 flex-col bg-base-100 shadow-[8px_0_28px_-18px_oklch(36%_0.06_158_/_0.5)]">
       {/* Marca + ações */}
-      <div className="flex items-center gap-1 border-b border-base-300 px-3 py-3">
+      <div className="flex items-center gap-1 px-3 py-3">
         <div className="min-w-0 flex-1">
           <Logo marca={marca} />
         </div>
@@ -190,7 +190,7 @@ export default function Sidebar({
       </div>
 
       {/* Filtros */}
-      <div className="border-y border-base-200 bg-base-200/40 px-3 py-2">
+      <div className="bg-base-200/50 px-3 py-2">
         <button
           type="button"
           onClick={() => setShowFilters((s) => !s)}
@@ -284,7 +284,7 @@ export default function Sidebar({
       </nav>
 
       {/* Rodapé: preços + loja + edição */}
-      <div className="space-y-1 border-t border-base-300 p-2">
+      <div className="space-y-1 p-2 shadow-[0_-6px_16px_-14px_oklch(36%_0.06_158_/_0.4)]">
         <PriceToggle className="w-full" />
         <a
           href={STORE_URL}

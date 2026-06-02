@@ -73,7 +73,7 @@ export default function SiteShell({
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Topbar slim */}
-        <header className="sticky top-0 z-30 flex items-center gap-2 border-b border-base-300 bg-base-100/85 px-3 py-2 backdrop-blur">
+        <header className="sticky top-0 z-30 flex items-center gap-2 bg-base-100/85 px-3 py-2 shadow-[0_6px_18px_-12px_oklch(36%_0.06_158_/_0.45)] backdrop-blur">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
@@ -108,7 +108,7 @@ export default function SiteShell({
           {children}
         </main>
 
-        <footer className="border-t border-base-300 bg-base-100 px-6 py-5 text-center text-sm text-base-content/55">
+        <footer className="bg-base-100 px-6 py-5 text-center text-sm text-base-content/55 shadow-[0_-6px_18px_-14px_oklch(36%_0.06_158_/_0.4)]">
           Flora Mattos · Cultivo Afetivo — dados inspirados na{" "}
           <a
             className="link link-hover"

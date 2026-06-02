@@ -1,13 +1,14 @@
 import { ImageResponse } from "next/og";
 import { reader, getMarca } from "../../reader";
 import { localImageDataUri } from "@/lib/serverImage";
-import { SITE_DOMAIN } from "@/lib/site";
+import { STORE_URL } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
 const VERDE = "#1B4332";
 const VERDE_CLARO = "#5C7D63";
 const BEGE = "#D9C7A7";
+const BEGE_CLARO = "#EDE3D2";
 const CREME = "#FBF8F2";
 
 function nodeToText(node: unknown): string {
@@ -66,6 +67,10 @@ export async function GET(request: Request, ctx: { params: Promise<{ slug: strin
   const url = new URL(request.url);
   const origin = url.origin;
   const formato = url.searchParams.get("f") === "feed" ? "feed" : "story";
+  const comPreco = ["1", "true", "sim"].includes(
+    (url.searchParams.get("preco") || "").toLowerCase()
+  );
+  const logoOri = url.searchParams.get("logo") === "horizontal" ? "horizontal" : "vertical";
   const W = 1080;
   const H = formato === "feed" ? 1350 : 1920;
 
@@ -75,7 +80,12 @@ export async function GET(request: Request, ctx: { params: Promise<{ slug: strin
     (await localImageDataUri(planta.imagemPadrao)) ??
     (planta.imagemPadrao ? `${origin}${planta.imagemPadrao}` : null) ??
     principal;
-  const logo = await localImageDataUri(marca.logoUrl);
+  const [logoV, logoH] = await Promise.all([
+    localImageDataUri(marca.logoUrl),
+    localImageDataUri(marca.logoHorizontalUrl),
+  ]);
+  const logo = logoOri === "horizontal" ? logoH ?? logoV : logoV ?? logoH;
+  const logoBox = logoOri === "horizontal" ? { w: 300, h: 110 } : { w: 190, h: 190 };
 
   const { node } = await planta.descricao();
   let descricao = nodeToText(node).replace(/\s+/g, " ").trim();
@@ -84,7 +94,17 @@ export async function GET(request: Request, ctx: { params: Promise<{ slug: strin
 
   const luz = (planta.luminosidade ?? []).join(", ") || "—";
   const fonte = (planta.fonte ?? "").trim();
-  const linkLoja = `${SITE_DOMAIN}/planta/${slug}`;
+  const linkLoja = STORE_URL.replace(/^https?:\/\//, "");
+
+  const fmtPreco = (v: string) => {
+    const n = Number((v || "").replace(/\./g, "").replace(",", "."));
+    return Number.isFinite(n) && n > 0
+      ? `R$ ${n.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} + frete`
+      : null;
+  };
+  const precos = (planta.tamanhos ?? [])
+    .map((t) => ({ tam: t.tamanho, txt: fmtPreco(t.preco) }))
+    .filter((p) => p.txt);
 
   const [lora, monts] = await Promise.all([loadFont("Lora", 600), loadFont("Montserrat Alternates", 500)]);
   const fonts: { name: string; data: ArrayBuffer; weight: 400 | 600; style: "normal" }[] = [];
@@ -94,7 +114,7 @@ export async function GET(request: Request, ctx: { params: Promise<{ slug: strin
   const bodyFont = monts ? "Montserrat" : "sans-serif";
 
   const photoH = formato === "feed" ? 760 : 1040;
-  const circle = formato === "feed" ? 190 : 230;
+  const circle = formato === "feed" ? 380 : 460;
 
   function Attr({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
     return (
@@ -114,15 +134,15 @@ export async function GET(request: Request, ctx: { params: Promise<{ slug: strin
     (
       <div style={{ width: W, height: H, display: "flex", flexDirection: "column", backgroundColor: CREME, fontFamily: bodyFont }}>
         {/* Palco da foto */}
-        <div style={{ display: "flex", position: "relative", width: W, height: photoH }}>
+        <div style={{ display: "flex", position: "relative", width: W, height: photoH, backgroundColor: BEGE_CLARO, alignItems: "center", justifyContent: "center" }}>
           {principal ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={principal} width={W} height={photoH} style={{ width: W, height: photoH, objectFit: "cover" }} alt="" />
+            <img src={principal} width={W} height={photoH} style={{ width: W, height: photoH, objectFit: "contain" }} alt="" />
           ) : (
-            <div style={{ display: "flex", width: W, height: photoH, backgroundColor: BEGE, alignItems: "center", justifyContent: "center", fontSize: 200 }}>🌿</div>
+            <div style={{ display: "flex", fontSize: 200 }}>🌿</div>
           )}
 
-          {/* Card do logo (canto superior esquerdo) */}
+          {/* Card do logo (canto superior esquerdo) — só o logo */}
           <div
             style={{
               position: "absolute",
@@ -130,39 +150,41 @@ export async function GET(request: Request, ctx: { params: Promise<{ slug: strin
               left: 30,
               display: "flex",
               alignItems: "center",
-              gap: 14,
+              justifyContent: "center",
               backgroundColor: CREME,
-              borderRadius: 18,
-              padding: "16px 22px",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+              borderRadius: 24,
+              padding: 22,
+              boxShadow: "0 18px 40px rgba(0,0,0,0.22)",
             }}
           >
             {logo ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={logo} width={66} height={66} style={{ width: 66, height: 66, objectFit: "contain" }} alt="" />
+              <img
+                src={logo}
+                width={logoBox.w}
+                height={logoBox.h}
+                style={{ width: logoBox.w, height: logoBox.h, objectFit: "contain" }}
+                alt=""
+              />
             ) : (
-              <span style={{ fontSize: 50 }}>🌿</span>
+              <span style={{ fontSize: 64 }}>🌿</span>
             )}
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <span style={{ fontSize: 34, color: VERDE, fontFamily: titleFont }}>{marca.nome}</span>
-              <span style={{ fontSize: 18, letterSpacing: 4, textTransform: "uppercase", color: VERDE_CLARO }}>{marca.subtitulo}</span>
-            </div>
           </div>
 
-          {/* Círculo de detalhe (canto superior direito) */}
+          {/* Círculo de detalhe (canto inferior direito da foto) */}
           {detalhe ? (
             <div
               style={{
                 position: "absolute",
-                top: 40,
-                right: 40,
+                bottom: 28,
+                right: 28,
                 width: circle,
                 height: circle,
                 borderRadius: circle,
                 border: `6px solid ${CREME}`,
                 overflow: "hidden",
                 display: "flex",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.22)",
+                boxShadow: "0 14px 34px rgba(0,0,0,0.28)",
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -194,6 +216,26 @@ export async function GET(request: Request, ctx: { params: Promise<{ slug: strin
             <Attr icon={<PinIcon />} label="Origem" value={planta.origem || "—"} />
             <Attr icon={<SunIcon />} label="Luz" value={luz} />
           </div>
+
+          {comPreco && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 24, paddingTop: 22, borderTop: `2px solid ${BEGE}` }}>
+              <span style={{ fontSize: 22, letterSpacing: 2, textTransform: "uppercase", color: VERDE_CLARO }}>
+                {precos.length > 1 ? "Tamanhos e preços" : "Preço"}
+              </span>
+              {precos.length === 0 ? (
+                <span style={{ fontSize: 34, color: VERDE, fontFamily: titleFont }}>Sob consulta</span>
+              ) : (
+                precos.map((p, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+                    {p.tam && p.tam !== "Único" ? (
+                      <span style={{ fontSize: 26, color: VERDE_CLARO, fontFamily: titleFont }}>{p.tam}</span>
+                    ) : null}
+                    <span style={{ fontSize: 38, color: VERDE, fontFamily: titleFont }}>{p.txt}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
 
           {fonte ? <span style={{ fontSize: 18, color: "#9CA3AF", marginTop: 18 }}>Fonte: {fonte}</span> : null}
         </div>

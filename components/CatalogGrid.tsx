@@ -22,7 +22,7 @@ export default function CatalogGrid() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-box border border-dashed border-base-300 p-12 text-center text-base-content/50">
+        <div className="rounded-box bg-base-100 p-12 text-center text-base-content/50 shadow-soft">
           Nenhuma planta corresponde à busca/filtros.
         </div>
       ) : (

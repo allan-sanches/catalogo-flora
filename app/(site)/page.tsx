@@ -4,7 +4,7 @@ import CatalogGrid from "@/components/CatalogGrid";
 export default function Home() {
   return (
     <div className="space-y-6">
-      <section className="rounded-box border border-base-300 bg-gradient-to-br from-primary/10 via-base-100 to-accent/10 px-6 py-8">
+      <section className="rounded-box shadow-soft bg-gradient-to-br from-primary/10 via-base-100 to-accent/10 px-6 py-8">
         <p className="font-title text-xs uppercase tracking-[0.3em] text-primary/70">
           Cultivo Afetivo
         </p>

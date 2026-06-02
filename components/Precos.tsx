@@ -42,7 +42,7 @@ export function TabelaTamanhos({
 }) {
   if (tamanhos.length === 0) {
     return (
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-box border border-base-300 bg-base-100 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 panel px-4 py-3">
         <span className="font-title text-lg font-semibold text-base-content/60">
           Sob consulta
         </span>
@@ -52,7 +52,7 @@ export function TabelaTamanhos({
   }
 
   return (
-    <div className="overflow-hidden rounded-box border border-base-300 bg-base-100">
+    <div className="overflow-hidden rounded-box panel">
       <ul className="divide-y divide-base-200">
         {tamanhos.map((t, i) => (
           <li

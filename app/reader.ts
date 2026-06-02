@@ -9,15 +9,17 @@ export type PlantaEntry = Awaited<
 
 export type Marca = {
   logoUrl: string | null;
+  logoHorizontalUrl: string | null;
   nome: string;
   subtitulo: string;
 };
 
-/** Lê a configuração da marca (logo/nome/subtítulo) com valores padrão. */
+/** Lê a configuração da marca (logos/nome/subtítulo) com valores padrão. */
 export async function getMarca(): Promise<Marca> {
   const m = await reader.singletons.marca.read();
   return {
     logoUrl: m?.logo ?? null,
+    logoHorizontalUrl: m?.logoHorizontal ?? null,
     nome: m?.nome?.trim() || "Flora Mattos",
     subtitulo: m?.subtitulo?.trim() || "Cultivo Afetivo",
   };

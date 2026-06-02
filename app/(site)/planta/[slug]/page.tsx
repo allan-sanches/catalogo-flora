@@ -5,10 +5,11 @@ import { notFound } from "next/navigation";
 import Markdoc from "@markdoc/markdoc";
 import { reader } from "../../../reader";
 import { markdocConfig } from "../../../../keystatic.config";
-import { Megaphone, Smartphone, Square, Download } from "lucide-react";
+import { Megaphone } from "lucide-react";
 import { LuzBadges, OrigemBadge, Badge } from "@/components/Badges";
 import StoreButton from "@/components/StoreButton";
 import { TabelaTamanhos } from "@/components/Precos";
+import PanfletoControls from "@/components/PanfletoControls";
 
 export async function generateStaticParams() {
   const slugs = await reader.collections.plantas.list();
@@ -69,7 +70,7 @@ export default async function PlantaPage({
       <header className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* Fotos */}
         <div className="flex flex-col gap-2">
-          <figure className="relative aspect-[4/3] w-full overflow-hidden rounded-box border border-base-300 bg-base-200">
+          <figure className="relative aspect-[4/3] w-full overflow-hidden rounded-box bg-base-200 shadow-soft">
             {planta.imagem ? (
               <Image
                 src={planta.imagem}
@@ -91,7 +92,7 @@ export default async function PlantaPage({
             )}
           </figure>
           {planta.imagemPadrao && (
-            <figure className="relative aspect-[16/9] w-full overflow-hidden rounded-box border border-base-300 bg-base-200">
+            <figure className="relative aspect-[16/9] w-full overflow-hidden rounded-box bg-base-200 shadow-soft">
               <Image
                 src={planta.imagemPadrao}
                 alt={`${planta.nomeComum} — foto secundária`}
@@ -129,7 +130,7 @@ export default async function PlantaPage({
             )}
           </div>
 
-          <dl className="mt-2 rounded-box border border-base-300 bg-base-100 px-4 py-2">
+          <dl className="mt-2 panel px-4 py-2">
             <InfoRow label="Família" value={planta.familia} />
             <InfoRow label="Gênero" value={planta.genero} />
             <InfoRow label="Espécie" value={planta.especie} />
@@ -156,40 +157,17 @@ export default async function PlantaPage({
       </section>
 
       {/* Panfleto para redes sociais */}
-      <section className="rounded-box border border-base-300 bg-base-100 p-4">
+      <section className="panel p-4">
         <div className="flex items-center gap-2">
           <Megaphone className="h-5 w-5 text-primary" />
           <h2 className="font-title text-lg font-semibold">Panfleto para redes</h2>
         </div>
         <p className="mt-1 text-sm text-base-content/60">
-          Gere uma imagem pronta para publicar no Instagram com as informações
-          desta planta.
+          Gere uma imagem pronta para publicar no Instagram. Escolha o formato, o
+          logo e se quer incluir o preço (sempre exibido como “+ frete”).
         </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <a
-            href={`/panfleto/${slug}?f=story`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-primary btn-sm gap-2"
-          >
-            <Smartphone className="h-4 w-4" /> Story (9:16)
-          </a>
-          <a
-            href={`/panfleto/${slug}?f=feed`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-primary btn-outline btn-sm gap-2"
-          >
-            <Square className="h-4 w-4" /> Feed (4:5)
-          </a>
-          <a
-            href={`/panfleto/${slug}?f=story`}
-            download={`panfleto-${slug}.png`}
-            className="btn btn-ghost btn-sm gap-2 text-base-content/70"
-          >
-            <Download className="h-4 w-4" /> Baixar
-          </a>
-        </div>
+
+        <PanfletoControls slug={slug} />
       </section>
 
       {planta.fonte && (

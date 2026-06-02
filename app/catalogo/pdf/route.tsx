@@ -12,7 +12,9 @@ import {
 } from "@react-pdf/renderer";
 import { getPlantas, getMarca } from "../../reader";
 import { localImageDataUri } from "@/lib/serverImage";
-import { SITE_DOMAIN } from "@/lib/site";
+import { STORE_URL } from "@/lib/site";
+
+const LINK_LOJA = STORE_URL.replace(/^https?:\/\//, "");
 
 export const dynamic = "force-dynamic";
 
@@ -38,21 +40,21 @@ const s = StyleSheet.create({
   h1: { fontSize: 20, color: VERDE, fontFamily: "Helvetica-Bold", marginBottom: 14 },
   idxFam: { fontSize: 13, color: VERDE, fontFamily: "Helvetica-Bold", marginTop: 12, marginBottom: 2 },
   idxGen: { fontSize: 10, color: VERDE_CLARO, fontFamily: "Helvetica-Bold", marginTop: 6 },
-  idxItem: { fontSize: 9, color: CINZA, marginLeft: 10, marginTop: 1.5 },
-  idxLink: { marginLeft: 10, marginTop: 2, textDecoration: "none" },
+  idxRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginLeft: 12, marginTop: 3 },
+  idxLinkText: { textDecoration: "none", flexShrink: 1, paddingRight: 8 },
   idxName: { fontSize: 9.5, color: VERDE, fontFamily: "Helvetica-Bold" },
   idxCient: { fontSize: 9, color: CINZA, fontStyle: "italic" },
   idxPag: { fontSize: 8.5, color: VERDE_CLARO },
 
   // post (1 planta por página)
   post: { paddingTop: 0, paddingBottom: 46, paddingHorizontal: 0, fontFamily: "Helvetica", color: "#1f2937", backgroundColor: CREME },
-  topbar: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: VERDE, paddingVertical: 14, paddingHorizontal: 34 },
-  topbarName: { fontSize: 15, color: CREME, fontFamily: "Helvetica-Bold" },
-  topbarSub: { fontSize: 8, color: BEGE, letterSpacing: 2, textTransform: "uppercase" },
-  heroWrap: { position: "relative", width: "100%" },
-  hero: { width: "100%", height: 300, objectFit: "cover", backgroundColor: BEGE_CLARO },
-  heroPh: { width: "100%", height: 300, backgroundColor: BEGE_CLARO, alignItems: "center", justifyContent: "center" },
-  detailCircle: { position: "absolute", top: 16, right: 26, width: 96, height: 96, borderRadius: 48, objectFit: "cover", border: `4px solid ${CREME}` },
+  topbar: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: CREME, paddingVertical: 12, paddingHorizontal: 34 },
+  topbarName: { fontSize: 15, color: VERDE, fontFamily: "Helvetica-Bold" },
+  topbarSub: { fontSize: 8, color: VERDE_CLARO, letterSpacing: 2, textTransform: "uppercase" },
+  heroWrap: { position: "relative", width: "100%", backgroundColor: BEGE_CLARO },
+  hero: { width: "100%", height: 320, objectFit: "contain", backgroundColor: BEGE_CLARO },
+  heroPh: { width: "100%", height: 320, backgroundColor: BEGE_CLARO, alignItems: "center", justifyContent: "center" },
+  detailCircle: { position: "absolute", bottom: 14, right: 22, width: 150, height: 150, borderRadius: 75, objectFit: "cover", border: `5px solid ${CREME}` },
   ctaBar: { position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: VERDE, paddingVertical: 12, alignItems: "center" },
   ctaTitle: { fontSize: 12, color: CREME, fontFamily: "Helvetica-Bold", letterSpacing: 1 },
   ctaUrl: { fontSize: 9, color: BEGE, marginTop: 2 },
@@ -122,7 +124,11 @@ export async function GET() {
       detalhes[p.slug] = dt ?? pr; // usa a foto principal se não houver detalhe
     })
   );
-  const logoData = await localImageDataUri(marca.logoUrl);
+  const [logoData, logoHorizData] = await Promise.all([
+    localImageDataUri(marca.logoUrl),
+    localImageDataUri(marca.logoHorizontalUrl),
+  ]);
+  const topbarLogo = logoHorizData ?? logoData;
 
   // pré-carrega as descrições (texto puro do Markdoc)
   const descricoes: Record<string, string> = {};
@@ -158,11 +164,18 @@ export async function GET() {
 
   // ordem dos posts: por família, gênero, nome
   const ordenadas = familias.flatMap((f) => f.generos.flatMap((g) => g.lista));
-  // página de cada planta: capa = 1, depois 1 página por planta na ordem acima
+  // Índice paginado de forma determinística (PER entradas por página),
+  // assim sabemos quantas páginas o índice ocupa e calculamos a página de
+  // cada planta (1 página por planta): capa(1) + índice + posição.
+  const PER = 22;
+  const indicePages = Math.max(1, Math.ceil(ordenadas.length / PER));
+  const plantStartPage = 1 + indicePages + 1;
   const pageOf: Record<string, number> = {};
   ordenadas.forEach((p, i) => {
-    pageOf[p.slug] = i + 2;
+    pageOf[p.slug] = plantStartPage + i;
   });
+  const idxChunks: (typeof ordenadas)[] = [];
+  for (let i = 0; i < ordenadas.length; i += PER) idxChunks.push(ordenadas.slice(i, i + PER));
 
   const Footer = () => (
     <Text style={s.footer} fixed render={({ pageNumber, totalPages }) => `${marca.nome} · ${marca.subtitulo}                                                                 ${pageNumber} / ${totalPages}`} />
@@ -192,6 +205,45 @@ export async function GET() {
         <Footer />
       </Page>
 
+      {/* ÍNDICE (após a capa) — clicável e com número de página */}
+      {idxChunks.map((chunk, ci) => {
+        let lastFam = "";
+        let lastGen = "";
+        return (
+          <Page key={`idx-${ci}`} size="A4" style={s.page}>
+            <View style={s.headerFix} fixed>
+              <Text>{marca.nome}</Text>
+              <Text>Índice</Text>
+            </View>
+            {ci === 0 ? <Text style={s.h1}>Índice</Text> : null}
+            {chunk.map((p) => {
+              const fam = p.familia?.trim() || "Outros";
+              const gen = p.genero?.trim() || "Outros";
+              const showFam = fam !== lastFam;
+              const showGen = showFam || gen !== lastGen;
+              lastFam = fam;
+              lastGen = gen;
+              return (
+                <View key={p.slug}>
+                  {showFam ? <Text style={s.idxFam}>{fam}</Text> : null}
+                  {showGen ? <Text style={s.idxGen}>{gen}</Text> : null}
+                  <View style={s.idxRow} wrap={false}>
+                    <Link href={`#${p.slug}`} style={s.idxLinkText}>
+                      <Text>
+                        <Text style={s.idxName}>{p.nomeComum}</Text>
+                        <Text style={s.idxCient}> — {p.nomeCientifico}</Text>
+                      </Text>
+                    </Link>
+                    <Text style={s.idxPag}>pág. {pageOf[p.slug]}</Text>
+                  </View>
+                </View>
+              );
+            })}
+            <Footer />
+          </Page>
+        );
+      })}
+
       {/* UM POST POR PLANTA */}
       {ordenadas.map((p) => {
         const foto = fotos[p.slug];
@@ -200,16 +252,18 @@ export async function GET() {
         return (
           <Page key={p.slug} size="A4" style={s.post} id={p.slug} bookmark={p.nomeComum}>
             <View style={s.topbar}>
-              {logoData ? (
+              {topbarLogo ? (
                 // eslint-disable-next-line jsx-a11y/alt-text
-                <Image src={logoData} style={{ width: 26, height: 26, objectFit: "contain" }} />
+                <Image src={topbarLogo} style={{ height: 40, width: 210, objectFit: "contain" }} />
               ) : (
-                <Leaf size={22} color={CREME} />
+                <>
+                  <Leaf size={22} color={VERDE} />
+                  <View>
+                    <Text style={s.topbarName}>{marca.nome}</Text>
+                    <Text style={s.topbarSub}>{marca.subtitulo}</Text>
+                  </View>
+                </>
               )}
-              <View>
-                <Text style={s.topbarName}>{marca.nome}</Text>
-                <Text style={s.topbarSub}>{marca.subtitulo}</Text>
-              </View>
             </View>
 
             <View style={s.heroWrap}>
@@ -282,7 +336,7 @@ export async function GET() {
                     <View key={i} style={s.precoRow}>
                       <Text style={s.precoTam}>{t.tamanho}</Text>
                       <Text style={s.precoVal}>
-                        {v ? `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "Consultar"}
+                        {v ? `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} + frete` : "Consultar"}
                       </Text>
                       {t.precoDe ? <Text style={s.precoDe}>R$ {t.precoDe}</Text> : null}
                     </View>
@@ -296,38 +350,11 @@ export async function GET() {
             <Text style={s.pageNum} fixed render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
             <View style={s.ctaBar}>
               <Text style={s.ctaTitle}>COMPRE NA LOJA</Text>
-              <Text style={s.ctaUrl}>{`${SITE_DOMAIN}/planta/${p.slug}`}</Text>
+              <Text style={s.ctaUrl}>{LINK_LOJA}</Text>
             </View>
           </Page>
         );
       })}
-
-      {/* ÍNDICE (no fim) — clicável e com número de página */}
-      <Page size="A4" style={s.page} bookmark="Índice">
-        <View style={s.headerFix} fixed>
-          <Text>{marca.nome}</Text>
-          <Text>Índice</Text>
-        </View>
-        <Text style={s.h1}>Índice</Text>
-        {familias.map((f) => (
-          <View key={f.familia} wrap={false}>
-            <Text style={s.idxFam}>{f.familia}</Text>
-            {f.generos.map((g) => (
-              <View key={g.genero}>
-                <Text style={s.idxGen}>{g.genero} ({g.lista.length})</Text>
-                {g.lista.map((p) => (
-                  <Link key={p.slug} href={`#${p.slug}`} style={s.idxLink}>
-                    <Text style={s.idxName}>{p.nomeComum}</Text>
-                    <Text style={s.idxCient}> — {p.nomeCientifico}</Text>
-                    <Text style={s.idxPag}>  pág. {pageOf[p.slug]}</Text>
-                  </Link>
-                ))}
-              </View>
-            ))}
-          </View>
-        ))}
-        <Footer />
-      </Page>
     </Document>
   );
 
