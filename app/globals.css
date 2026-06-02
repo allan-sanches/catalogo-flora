@@ -1,0 +1,89 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@plugin "daisyui" {
+  themes: flora --default, dark;
+}
+
+/* Tema "flora" — identidade Flora Mattos: verde-floresta sobre bege quente */
+@plugin "daisyui/theme" {
+  name: "flora";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  /* Estilo "lab" limpo: branco quente para cards/sidebar, fundo bege claro */
+  --color-base-100: oklch(99% 0.006 85);
+  --color-base-200: oklch(96% 0.012 82);
+  --color-base-300: oklch(89% 0.02 82);
+  --color-base-content: oklch(30% 0.05 158);
+
+  /* Verde-escuro do logo */
+  --color-primary: oklch(36% 0.06 158);
+  --color-primary-content: oklch(95% 0.02 85);
+  --color-secondary: oklch(50% 0.07 160);
+  --color-secondary-content: oklch(96% 0.02 85);
+  --color-accent: oklch(72% 0.09 80);
+  --color-accent-content: oklch(30% 0.05 158);
+  --color-neutral: oklch(34% 0.05 158);
+  --color-neutral-content: oklch(95% 0.02 85);
+
+  --color-info: oklch(62% 0.08 220);
+  --color-success: oklch(55% 0.1 155);
+  --color-warning: oklch(75% 0.13 75);
+  --color-error: oklch(58% 0.18 28);
+
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
+  --border: 1px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Tipografia da marca: títulos em Lora, corpo em Montserrat Alternates */
+body {
+  font-family: var(--font-montserrat-alternates), ui-sans-serif, system-ui, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6,
+.font-title,
+.card-title,
+.prose :is(h1, h2, h3, h4) {
+  font-family: var(--font-lora), ui-serif, Georgia, serif;
+}
+
+/* Card flat estilo lab: borda sutil + leve elevação no hover */
+.card-flora {
+  border: 1px solid var(--color-base-300);
+  background: var(--color-base-100);
+  border-radius: var(--radius-box);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.card-flora:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklch, var(--color-primary) 35%, var(--color-base-300));
+  box-shadow: 0 10px 24px -14px color-mix(in oklch, var(--color-primary) 60%, transparent);
+}
+
+/* Scrollbar discreta na sidebar */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-base-300) transparent;
+}
+
+/* ===== Ocultar preços por padrão =====
+   Preços ficam escondidos a menos que html tenha data-prices="shown". */
+.preco-valor {
+  display: inline-flex;
+}
+.preco-mascarado {
+  display: none;
+}
+html:not([data-prices="shown"]) .preco-valor {
+  display: none !important;
+}
+html:not([data-prices="shown"]) .preco-mascarado {
+  display: inline-flex;
+}
