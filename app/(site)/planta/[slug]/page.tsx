@@ -69,8 +69,8 @@ export default async function PlantaPage({
 
       <header className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* Fotos */}
-        <div className="flex flex-col gap-2">
-          <figure className="relative aspect-[4/3] w-full overflow-hidden rounded-box bg-base-200 shadow-soft">
+        <div className="flex min-h-full flex-col gap-2">
+          <figure className="relative w-full flex-1 min-h-[20rem] overflow-hidden rounded-box bg-base-200 shadow-soft">
             {planta.imagem ? (
               <Image
                 src={planta.imagem}
